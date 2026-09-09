@@ -1,6 +1,6 @@
 ---
 name: article-image-director
-description: Turn an article, tutorial, or technical explainer into a coherent series of content-faithful visuals, choosing among explanatory diagrams, comparisons, code-relationship graphics, and editorial illustrations. Use when the user wants images that clarify specific passages rather than generic decoration or a single cover image.
+description: Generate a coherent series of article-specific raster illustrations using the available image-generation tool. Use for article or tutorial illustration requests, including technical subjects; diagrams and comparisons are content inside generated illustrations, not SVG or code-rendered replacements.
 ---
 
 # Article Image Director
@@ -9,12 +9,25 @@ Turn an article into a small visual explanation system. Select passages that ben
 
 The primary goal is fidelity to the article. Style and series consistency support comprehension; they must not replace concrete subject matter with generic metaphors.
 
+## Execution contract: generate images, not drawing code
+
+For an article-image request, the deliverables are actual raster images produced by the environment's image-generation capability. Planning, prompts, and code are supporting material, not completed images.
+
+- After reading the article and inspecting available references, prepare a concise storyboard and invoke the actual image-generation tool in the same turn when it is available. Do not end with only a plan or ask whether to start when the user has already requested generation.
+- Use the callable image-generation capability exposed in the current environment. Its name may differ across products; do not invent a tool name, claim to invoke a nonexistent tool, or print a simulated tool call.
+- Do not substitute SVG, Mermaid, HTML/CSS, canvas, Python/Pillow, matplotlib, ASCII art, or screenshots of code-rendered drawings for the requested generated images. Exporting such drawings as PNG does not satisfy this requirement.
+- “Technical diagram”, “comparison”, and “code-relationship graphic” describe the information shown inside an image-generated illustration. They do not select a code renderer.
+- If the user explicitly requests SVG, editable diagrams, code rendering, or prompts only, honor that request and identify the changed deliverable. A technical topic, dense labels, or a failed generation call is not such a request.
+- If image generation is unavailable, say that actual images cannot be generated in this session. If a call fails transiently, retry the failed image once; if it fails again, deliver any successful images, identify what remains incomplete, and report the error. Do not silently change rendering methods or claim that saved prompts are images.
+- Count an image as complete only after a real generation result is returned and visually checked. Report partial completion accurately; never fabricate image links, tool success, or background progress.
+
 ## Inputs and defaults
 
 - Accept full text, Markdown, or a readable URL.
 - Treat user-supplied style references and recurring-character images as optional overrides.
 - Default to 4 images, 4:3 landscape, low-to-medium visual density, and only the minimum text needed for comprehension.
 - Treat the requested count, ratio, text policy, and supplied references as authoritative.
+- Use the user’s requested language for visible explanatory labels, captions, and delivery notes. Otherwise follow the article language; keep necessary protocol names and code identifiers unchanged.
 
 When the user does not provide overrides, use the bundled defaults:
 
@@ -23,11 +36,15 @@ When the user does not provide overrides, use the bundled defaults:
 
 The bundled protagonist is a reusable narrative guide, not a required subject in every frame. Replace it when the user supplies a character, asks for another protagonist, or when the article clearly benefits from a different person, profession, age presentation, creature, or non-human guide. Preserve the new protagonist consistently across the series.
 
+Resolve bundled asset paths only when those files are accessible in the current environment. In a web chat, a path written in this document is not itself an attached image. Use accessible attachments as actual visual inputs. If bundled references are missing, disclose that fact and proceed with the written style lock when no exact reference match was requested; if exact identity or reference matching is required, request the missing images before generating.
+
 If a URL or style reference cannot be read, say so. Do not invent article details or claim to have analyzed an unavailable reference. Ask for pasted content only when the missing source prevents useful work.
 
 ## Editorial planning
 
-Before generating, summarize the article as:
+Before generating, prepare the following brief as working notes. Show only a concise summary before the first image call; do not spend the entire response printing planning schemas. Include the complete planning material with the deliverables when the environment permits.
+
+Summarize the article as:
 
 ```yaml
 ARTICLE_BRIEF:
@@ -120,13 +137,13 @@ Select the form from the content rather than applying one illustration style to 
 
 When using the bundled style, embed these forms inside the illustrated learning scene instead of switching to a sterile standalone infographic. The technical board remains the explanatory core; the room and protagonist provide warmth, attention direction, and narrative continuity.
 
-Technical visuals may contain short labels copied exactly from the article. Prefer real identifiers over invented symbols. Do not render paragraphs, long code samples, or decorative pseudo-code. When the image model is likely to corrupt important text, simplify to a few large labels; if exact text remains critical, recommend a deterministic diagram instead of pretending the generated text is reliable.
+Technical visuals may contain short labels copied exactly from the article. Prefer real identifiers over invented symbols. Do not render paragraphs, long code samples, or decorative pseudo-code. When important text is difficult to render, simplify to a few large labels and place exact code or longer explanations in the adjacent caption. Correct a failed image with a targeted image-generation edit or regeneration. If a critical relationship or label still cannot be made reliable, mark the frame incomplete and explain the limitation; do not switch to deterministic drawing without an explicit user request.
 
 ## Prompt and generation
 
-Generate each storyboard frame independently with the available image-generation capability. Never combine the requested series into a single contact sheet or collage.
+Invoke the image-generation tool for each storyboard frame as a separate asset. Generate and inspect the first frame before continuing the series; then reuse the style and character locks for the remaining frames. Never combine the requested series into a single contact sheet or collage.
 
-For every generation call, include the relevant images as actual visual inputs rather than relying only on prose:
+When reference images are accessible and the tool accepts them, include the relevant images as actual visual inputs rather than relying only on prose. Follow the missing-reference rule above when they are unavailable, and disclose any inability to pass them to the tool:
 
 - Include one or two bundled style references that best match the planned composition; rotate references across the series when useful.
 - Include `assets/default-protagonist.png` whenever the default protagonist appears.
@@ -168,4 +185,4 @@ Inspect every result against its assigned job and the series lock:
 
 ## Deliverables
 
-Return the article brief, style lock, storyboard with placement notes, each generated image as a separate asset, and the final prompt set. Save all requested final assets in the workspace when they are intended for publication, and report their paths.
+Lead with the actual generated images and completion count. Return the article brief, style lock, storyboard with placement notes, and final prompt set as supporting material. Save publication assets and report their paths when a filesystem is available; otherwise use the real image attachments or download links returned by the environment. Do not invent local paths in a web chat. Identify any missing or failed frames explicitly.
